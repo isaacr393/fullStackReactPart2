@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import ClientApi from './client'
 
 const App = () => {
-  const [ persons, setPersons ] = useState([
-    { name: 'Arto Hellas', number:'000-442323' }
-  ]) 
+  const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ number, setNumber ] = useState('')
   const [ search, setSearch ] = useState('')
@@ -26,12 +25,20 @@ const App = () => {
       return false
     }
 
-    setPersons(persons.concat({name:newName, number:number}))
+    ClientApi.create({name:newName, number:number})
+    .then( (data) => setPersons([...persons, data]) )
+    .catch( err => console.log( err ))
+
     setNewName('')
     setNumber('')
   }
 
   const findPerson = (name) => persons.some( person => person.name === name )
+
+  useEffect( () => {
+     ClientApi.getAll()
+     .then( data => setPersons(data) )
+  }, [])
 
   const personsFiltered = search
   ?persons.filter( person => person.name.toLocaleLowerCase().match(search.toLocaleLowerCase()) || person.number.toLocaleLowerCase().match(search.toLocaleLowerCase()) )
