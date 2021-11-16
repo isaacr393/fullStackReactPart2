@@ -16,10 +16,16 @@ const deleteRegister = (id) =>{
     return request.then( res => res.data )
 }
 
+const updateRegiser = (person) => {
+    const request = axios.put(`${baseUrl}/${person.id}`, person)
+    return request.then( res => res.data )
+}
+
 const exportedObject = {
     getAll,
     create,
-    deleteRegister
+    deleteRegister,
+    updateRegiser
 }
 
 export default exportedObject

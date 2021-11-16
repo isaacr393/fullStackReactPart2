@@ -20,29 +20,40 @@ const App = () => {
   const handleSubmit = (e) =>{
     e.preventDefault()
 
-    if( findPerson(newName) ){
-      alert(`A person with the name ${newName} already exists`)
+    let prevPerson = findPerson(newName)
+    if( prevPerson ){
+      //alert(`A person with the name ${newName} already exists`)
+      if( ! window.confirm( `Are you sure to update ${newName}'s number?`) )
       return false
+      else{
+        prevPerson.number = number
+        ClientApi.updateRegiser(prevPerson)
+        .then( () => setPersons(persons.map( person => person.id !== prevPerson.id?person: {...prevPerson })) )
+        .catch( err => console.log( err ))
+      }
+    }else{
+      ClientApi.create({name:newName, number:number})
+      .then( (data) => setPersons([...persons, data]) )
+      .catch( err => console.log( err ))
     }
-
-    ClientApi.create({name:newName, number:number})
-    .then( (data) => setPersons([...persons, data]) )
-    .catch( err => console.log( err ))
 
     setNewName('')
     setNumber('')
   }
 
   const handleDelete = (id)=>{
-    ClientApi.deleteRegister(id)
-    .then( () => {
-      let indexDelete = persons.findIndex( person => person.id === id )
-      setPersons([...persons.slice(0,indexDelete), ...persons.slice(indexDelete + 1, persons.length  )])
-    })
-    .catch( err => console.log( err ))
+    if(window.confirm('Are you sure to delete the person?')){
+      ClientApi.deleteRegister(id)
+      .then( () => {
+        let indexDelete = persons.findIndex( person => person.id === id )
+        setPersons([...persons.slice(0,indexDelete), ...persons.slice(indexDelete + 1, persons.length  )])
+      })
+      .catch( err => console.log( err ))
+    }
+    
   }
 
-  const findPerson = (name) => persons.some( person => person.name === name )
+  const findPerson = (name) => persons.find( person => person.name === name )
 
   useEffect( () => {
      ClientApi.getAll()
@@ -89,7 +100,15 @@ const PersonForm = ({ newName, number, handleChangeName, handleChangeNumber, han
 }
   
 const Persons = ({personsFiltered, handleDelete})=> {
-  const personsList = personsFiltered.map( (person)  => <span key={person.id} onClick={() => handleDelete(person.id) } > {person.name} : {person.number} <br /></span> )
+  const personsList = personsFiltered.map( (person)  => 
+  (
+    <div key={person.id}>
+      <span >
+        {person.name} : {person.number} 
+      </span>
+      <button onClick={() => handleDelete(person.id) }>DELETE</button>
+    </div>
+  ))
   return(
     <> 
       <h2>Numbers</h2>
