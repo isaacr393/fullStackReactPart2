@@ -33,6 +33,15 @@ const App = () => {
     setNumber('')
   }
 
+  const handleDelete = (id)=>{
+    ClientApi.deleteRegister(id)
+    .then( () => {
+      let indexDelete = persons.findIndex( person => person.id === id )
+      setPersons([...persons.slice(0,indexDelete), ...persons.slice(indexDelete + 1, persons.length  )])
+    })
+    .catch( err => console.log( err ))
+  }
+
   const findPerson = (name) => persons.some( person => person.name === name )
 
   useEffect( () => {
@@ -42,8 +51,7 @@ const App = () => {
 
   const personsFiltered = search
   ?persons.filter( person => person.name.toLocaleLowerCase().match(search.toLocaleLowerCase()) || person.number.toLocaleLowerCase().match(search.toLocaleLowerCase()) )
-  .map( (person, idx )  => <span key={idx} > {person.name} : {person.number} <br /></span> )
-  :persons.map( (person, idx )  => <span key={idx} > {person.name} : {person.number} <br /></span> )
+  :persons
   return (
     <div>
       <h2>Phonebook</h2>
@@ -53,7 +61,7 @@ const App = () => {
                   handleSubmit={handleSubmit} handleChangeNumber={handleChangeNumber}
       />
 
-      <Persons personsFiltered={personsFiltered} />
+      <Persons personsFiltered={personsFiltered} handleDelete={handleDelete}/>
       
     </div>
   )
@@ -80,7 +88,16 @@ const PersonForm = ({ newName, number, handleChangeName, handleChangeNumber, han
   )
 }
   
-const Persons = ({personsFiltered})=> <> <h2>Numbers</h2>{ personsFiltered }</>
+const Persons = ({personsFiltered, handleDelete})=> {
+  const personsList = personsFiltered.map( (person)  => <span key={person.id} onClick={() => handleDelete(person.id) } > {person.name} : {person.number} <br /></span> )
+  return(
+    <> 
+      <h2>Numbers</h2>
+      {personsList}
+    </>
+  )
+}
+  
     
 
 export default App;
