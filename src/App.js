@@ -29,7 +29,13 @@ const App = () => {
       else{
         prevPerson.number = number
         ClientApi.updateRegiser(prevPerson)
-        .then( () => setPersons(persons.map( person => person.id !== prevPerson.id?person: {...prevPerson })) )
+        .then( () => {
+          setPersons(persons.map( person => person.id !== prevPerson.id?person: {...prevPerson }))
+          setmessage({msg:'Person Updated succesfully', type:'SUCCESS'})
+          setTimeout( () => {
+            setmessage({msg:'', type:''})
+          }, 3000)
+        })
         .catch( err => console.log( err ))
       }
     }else{
@@ -55,7 +61,12 @@ const App = () => {
         let indexDelete = persons.findIndex( person => person.id === id )
         setPersons([...persons.slice(0,indexDelete), ...persons.slice(indexDelete + 1, persons.length  )])
       })
-      .catch( err => console.log( err ))
+      .catch( err => {
+        setmessage({msg:`The person of id '${id}' does not exist on the server anymore`, type:'ERROR'})
+        setTimeout( () => {
+          setmessage({msg:'', type:''})
+        }, 3000)
+      })
     }
     
   }
