@@ -6,6 +6,7 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ number, setNumber ] = useState('')
   const [ search, setSearch ] = useState('')
+  const [message, setmessage] = useState({msg: '', type:''})
 
   const handleChangeName = (e) =>{
     setNewName(e.target.value)
@@ -33,7 +34,13 @@ const App = () => {
       }
     }else{
       ClientApi.create({name:newName, number:number})
-      .then( (data) => setPersons([...persons, data]) )
+      .then( (data) => {
+        setPersons([...persons, data])
+        setmessage({msg:'Person created succesfully', type:'SUCCESS'})
+        setTimeout( () => {
+          setmessage({msg:'', type:''})
+        }, 3000)
+      })
       .catch( err => console.log( err ))
     }
 
@@ -66,6 +73,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification msg={message.msg} type={message.type} />
       <Filter sarch={search} handleChangeSearch={handleChangeSearch} />
     
       <PersonForm newName={newName} number={number} handleChangeName={handleChangeName} 
@@ -114,6 +122,25 @@ const Persons = ({personsFiltered, handleDelete})=> {
       <h2>Numbers</h2>
       {personsList}
     </>
+  )
+}
+
+const Notification = ({msg, type}) => {
+  if(!msg) 
+    return null
+  
+  let styleClass = {
+    borderColor: type ==='ERROR'?'red':'green',
+    border: '1px',
+    backgroundColor:type ==='ERROR'?'red':'green',
+    padding:15,
+    margin:10
+  }
+
+  return(
+    <div style={styleClass}>
+      <span>{msg}</span>
+    </div>
   )
 }
   
